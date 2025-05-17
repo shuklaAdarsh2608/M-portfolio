@@ -1,22 +1,25 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
-import { useState } from "react";
 
 const ContactForm = () => {
-const [name,setName] = useState("");
-const [email,setEmail] = useState("");
-const [message,setMessage] = useState("");
-const [success,setSuccess] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(""); // State for phone number
+  const [success, setSuccess] = useState("");
 
-const handleName =(e)=>{
-  setName(e.target.value)
-}
-const handleEmail =(e)=>{
-  setEmail(e.target.value)
-};
-const handleMessage =(e)=>{
-  setMessage(e.target.value)
-};
+  const handleName = (e) => {
+    setName(e.target.value);
+  };
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+  };
+  const handleMessage = (e) => {
+    setMessage(e.target.value);
+  };
+  const handlePhoneNumber = (e) => {
+    setPhoneNumber(e.target.value);
+  };
 
   const form = useRef();
 
@@ -29,20 +32,30 @@ const handleMessage =(e)=>{
       })
       .then(
         () => {
-          setName("")
-          setEmail("")
-          setMessage("")
-          setSuccess("Thanks for contacting !")
+          setName("");
+          setEmail("");
+          setMessage("");
+          setPhoneNumber(""); // Clear phone number field
+          setSuccess("Thanks for contacting! Redirecting to WhatsApp...");
+
+          // Create the WhatsApp link with a pre-filled message including phone number
+          const whatsappNumber = '+919792184584'; // Replace with your WhatsApp Business number (with country code)
+          const whatsappMessage = `New contact form submission:\nName: ${name}\nEmail: ${email}\nPhone: ${phoneNumber}\nMessage: ${message}`;
+          const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+
+          // Redirect the user to WhatsApp
+          window.open(whatsappLink, '_blank');
         },
         (error) => {
           console.log("FAILED...", error.text);
+          setSuccess("Failed to send email. Please try again later.");
         }
       );
   };
 
   return (
     <div>
-      <p className="text-Cyan">{success}</p>
+      <p className={`text-Cyan ${success.startsWith("Failed") ? "text-red-500" : ""}`}>{success}</p>
       <form
         className="flex flex-col gap-4 text-White"
         ref={form}
@@ -65,6 +78,15 @@ const handleMessage =(e)=>{
           className="h-12 rounded-lg bg-LightBrown px-2"
           value={email}
           onChange={handleEmail}
+        />
+        {/* Added Phone Number Input */}
+        <input
+          type="tel"
+          name="phone_number"
+          placeholder="Your Contact Number (Optional)"
+          className="h-12 rounded-lg bg-LightBrown px-2"
+          value={phoneNumber}
+          onChange={handlePhoneNumber}
         />
         <textarea
           name="message"
